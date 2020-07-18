@@ -134,6 +134,10 @@ int sim_t::run()
 {
   host = context_t::current();
   target.init(sim_thread_main, this);
+
+  boot_rom.reset(new fake_rom_t(64 << 10));
+  bus.add_device(DEFAULT_RSTVEC, boot_rom.get());
+
   return htif_t::run();
 }
 
@@ -236,54 +240,6 @@ void sim_t::make_dtb()
   }
 }
 
-void sim_t::set_rom()
-{
-  const int reset_vec_size = 8;
-
-  start_pc = start_pc == reg_t(-1) ? get_entry_point() : start_pc;
-
-  uint32_t reset_vec[reset_vec_size] = {
-    0x297,                                      // auipc  t0,0x0
-    0x28593 + (reset_vec_size * 4 << 20),       // addi   a1, t0, &dtb
-    0xf1402573,                                 // csrr   a0, mhartid
-    get_core(0)->get_xlen() == 32 ?
-      0x0182a283u :                             // lw     t0,24(t0)
-      0x0182b283u,                              // ld     t0,24(t0)
-    0x28067,                                    // jr     t0
-    0,
-    (uint32_t) (start_pc & 0xffffffff),
-    (uint32_t) (start_pc >> 32)
-  };
-  for(int i = 0; i < reset_vec_size; i++)
-    reset_vec[i] = to_le(reset_vec[i]);
-
-  std::vector<char> rom((char*)reset_vec, (char*)reset_vec + sizeof(reset_vec));
-
-  std::string dtb;
-  if (!dtb_file.empty()) {
-    std::ifstream fin(dtb_file.c_str(), std::ios::binary);
-    if (!fin.good()) {
-      std::cerr << "can't find dtb file: " << dtb_file << std::endl;
-      exit(-1);
-    }
-
-    std::stringstream strstream;
-    strstream << fin.rdbuf();
-
-    dtb = strstream.str();
-  } else {
-    dts = make_dts(INSNS_PER_RTC_TICK, CPU_HZ, initrd_start, initrd_end, bootargs, procs, mems);
-    dtb = dts_compile(dts);
-  }
-
-  rom.insert(rom.end(), dtb.begin(), dtb.end());
-  const int align = 0x1000;
-  rom.resize((rom.size() + align - 1) / align * align);
-
-  boot_rom.reset(new rom_device_t(rom));
-  bus.add_device(DEFAULT_RSTVEC, boot_rom.get());
-}
-
 char* sim_t::addr_to_mem(reg_t addr) {
   if (!paddr_ok(addr))
     return NULL;
@@ -298,8 +254,7 @@ char* sim_t::addr_to_mem(reg_t addr) {
 
 void sim_t::reset()
 {
-  if (dtb_enabled)
-    set_rom();
+  boot_rom.get()->set_writeable(false);
 }
 
 void sim_t::idle()

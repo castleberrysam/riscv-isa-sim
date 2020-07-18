@@ -41,7 +41,7 @@ static void handle_signal(int sig)
 }
 
 htif_t::htif_t()
-  : mem(this), entry(DRAM_BASE), sig_addr(0), sig_len(0),
+  : mem(this), entry(DEFAULT_RSTVEC), sig_addr(0), sig_len(0),
     tohost_addr(0), fromhost_addr(0), exitcode(0), stopped(false),
     syscall_proxy(this)
 {

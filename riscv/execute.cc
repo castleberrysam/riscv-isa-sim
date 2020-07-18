@@ -125,7 +125,7 @@ static void commit_log_print_insn(processor_t *p, reg_t pc, insn_t insn)
       if (prefix == 'c')
         fprintf(log_file, " c%d_%s ", rd, csr_name(rd));
       else
-        fprintf(log_file, " %c%2d ", prefix, rd);
+        fprintf(log_file, " %c%02d ", prefix, rd);
       if (is_vreg)
         commit_log_print_value(log_file, size, &p->VU.elt<uint8_t>(rd, 0));
       else
@@ -134,12 +134,12 @@ static void commit_log_print_insn(processor_t *p, reg_t pc, insn_t insn)
   }
 
   for (auto item : load) {
-    fprintf(log_file, " mem ");
+    fprintf(log_file, " load ");
     commit_log_print_value(log_file, xlen, std::get<0>(item));
   }
 
   for (auto item : store) {
-    fprintf(log_file, " mem ");
+    fprintf(log_file, " store ");
     commit_log_print_value(log_file, xlen, std::get<0>(item));
     fprintf(log_file, " ");
     commit_log_print_value(log_file, std::get<2>(item) << 3, std::get<1>(item));

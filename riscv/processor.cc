@@ -659,6 +659,9 @@ void processor_t::enter_debug_mode(uint8_t cause)
 
 void processor_t::take_trap(trap_t& t, reg_t epc)
 {
+  if (t.cause() == CAUSE_ILLEGAL_INSTRUCTION && (t.get_tval() & 0xffffffff) == 0xbaddecaf)
+    exit(0);
+
   if (debug) {
     fprintf(log_file, "core %3d: exception %s, epc 0x%016" PRIx64 "\n",
             id, t.name(), epc);
@@ -1646,7 +1649,7 @@ reg_t processor_t::get_csr(int which)
 
 reg_t illegal_instruction(processor_t* p, insn_t insn, reg_t pc)
 {
-  throw trap_illegal_instruction(0);
+  throw trap_illegal_instruction(insn.bits());
 }
 
 insn_func_t processor_t::decode_insn(insn_t insn)

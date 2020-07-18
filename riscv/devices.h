@@ -62,6 +62,22 @@ class mem_t : public abstract_device_t {
   size_t len;
 };
 
+class fake_rom_t : public mem_t {
+ public:
+  fake_rom_t(size_t size) : mem_t(size), writeable(true) {}
+  fake_rom_t(const fake_rom_t& that) = delete;
+
+  bool store(reg_t addr, size_t len, const uint8_t *bytes) {
+    if(!writeable) {return false;}
+    return mem_t::store(addr, len, bytes);
+  };
+
+  void set_writeable(bool writeable) { this->writeable = writeable; }
+
+ private:
+  bool writeable;
+};
+
 class clint_t : public abstract_device_t {
  public:
   clint_t(std::vector<processor_t*>&, uint64_t freq_hz, bool real_time);

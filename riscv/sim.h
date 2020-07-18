@@ -70,7 +70,7 @@ private:
   std::string dtb;
   std::string dtb_file;
   bool dtb_enabled;
-  std::unique_ptr<rom_device_t> boot_rom;
+  std::unique_ptr<fake_rom_t> boot_rom;
   std::unique_ptr<clint_t> clint;
   bus_t bus;
   log_file_t log_file;
@@ -78,8 +78,8 @@ private:
   processor_t* get_core(const std::string& i);
   void step(size_t n); // step through simulation
   static const size_t INTERLEAVE = 5000;
-  static const size_t INSNS_PER_RTC_TICK = 100; // 10 MHz clock for 1 BIPS core
-  static const size_t CPU_HZ = 1000000000; // 1GHz CPU
+  static const size_t INSNS_PER_RTC_TICK = 10; // 10 MHz clock for 100 MIPS core
+  static const size_t CPU_HZ = 100000000; // 100MHz CPU
   size_t current_step;
   size_t current_proc;
   bool debug;

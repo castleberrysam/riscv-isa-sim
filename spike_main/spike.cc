@@ -21,7 +21,7 @@ static void help(int exit_code = 1)
   fprintf(stderr, "usage: spike [host options] <target program> [target options]\n");
   fprintf(stderr, "Host Options:\n");
   fprintf(stderr, "  -p<n>                 Simulate <n> processors [default 1]\n");
-  fprintf(stderr, "  -m<n>                 Provide <n> MiB of target memory [default 2048]\n");
+  fprintf(stderr, "  -m<n>                 Provide <n> MiB of target memory [default 256]\n");
   fprintf(stderr, "  -m<a:m,b:n,...>       Provide memory regions of size m and n bytes\n");
   fprintf(stderr, "                          at base addresses a and b (with 4 KiB alignment)\n");
   fprintf(stderr, "  -d                    Interactive debug mode\n");
@@ -340,7 +340,7 @@ int main(int argc, char** argv)
   auto argv1 = parser.parse(argv);
   std::vector<std::string> htif_args(argv1, (const char*const*)argv + argc);
   if (mems.empty())
-    mems = make_mems("2048");
+    mems = make_mems("256");
 
   if (!*argv1)
     help();
